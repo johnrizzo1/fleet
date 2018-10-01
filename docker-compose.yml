@@ -35,3 +35,31 @@ services:
     image: redis:3.2.4
     ports:
       - "6379:6379"
+
+  fleet_prepdb:
+    build: .
+    command: fleet --mysql_address mysql:3306 prepare db
+    environment:
+      KOLIDE_MYSQL_ADDRESS: mysql:3307
+      KOLIDE_MYSQL_DATABASE: kolide
+      KOLIDE_MYSQL_USERNAME: kolide
+      KOLIDE_MYSQL_PASSWORD: kolide
+  
+  fleet:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./tools/osquery/kolide.crt:/etc/kolide/kolide.crt
+      - ./tools/osquery/kolide.key:/etc/kolide/kolide.key
+    environment:
+      KOLIDE_AUTH_JWT_KEY: 3zqHl2cPa0tMmaCa9vPSEq6dcwN7oLbP 
+      KOLIDE_SERVER_CERT: /etc/kolide/kolide.crt
+      KOLIDE_SERVER_KEY: /etc/kolide/kolide.key
+      KOLIDE_MYSQL_ADDRESS: mysql:3306
+      KOLIDE_MYSQL_DATABASE: kolide
+      KOLIDE_MYSQL_USERNAME: kolide
+      KOLIDE_MYSQL_PASSWORD: kolide
+      KOLIDE_REDIS_ADDRESS: redis:6379
+      # KOLIDE_REDIS_PASSWORD: 
+    command: fleet serve
